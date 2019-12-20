@@ -34,6 +34,17 @@ func PartB() int {
 }
 
 func run(code string, input int) int {
+	const (
+		opAdd = 1
+		opMul = 2
+		opInp = 3
+		opOut = 4
+		opJTr = 5
+		opJFa = 6
+		opLes = 7
+		opEqu = 8
+		opEnd = 99
+	)
 	var ops []int
 	for _, opStr := range strings.Split(code, ",") {
 		op, err := strconv.Atoi(opStr)

@@ -12,32 +12,74 @@ const realWire2 = "L995,U122,R472,U470,R725,U906,L83,U672,R448,U781,L997,U107,R6
 
 func main() {
 	fmt.Println(PartA())
+	fmt.Println(PartB())
+}
+
+type entry struct {
+	x, y int
 }
 
 func PartA() int {
-	return closestIntersection(realWire1, realWire2)
+	return closestIntersectionManhattan(realWire1, realWire2)
 }
 
-func closestIntersection(wire1, wire2 string) int {
-	type entry struct {
-		x, y int
-	}
+func closestIntersectionManhattan(wire1, wire2 string) int {
 	matrix := map[entry]int{
-		entry{0,0}: 1,
+		entry{0, 0}: 1,
 	}
-	run := func(wire string, val int, check func(x, y int)) {
+	closest := math.MaxInt64
+	run(wire1, wire2, func(x, y int) {
+		matrix[entry{x, y}] = 1
+	}, func(x, y int) {
+		if matrix[entry{x, y}] == 1 && !(x == 0 && y == 0) {
+			if got := abs(x) + abs(y); got < closest {
+				closest = got
+			}
+		}
+	})
+	return closest
+}
+
+func PartB() int {
+	return closestIntersectionSteps(realWire1, realWire2)
+}
+
+func closestIntersectionSteps(wire1, wire2 string) int {
+	matrix := map[entry]int{
+		entry{0, 0}: 1,
+	}
+	closest := math.MaxInt64
+	wire1Steps, wire2Steps := 0, 0
+	run(wire1, wire2, func(x, y int) {
+		wire1Steps++
+		if _, ok := matrix[entry{x, y}]; !ok {
+			matrix[entry{x, y}] = wire1Steps
+		}
+	}, func(x, y int) {
+		wire2Steps++
+		if posWire1Steps := matrix[entry{x,y}]; posWire1Steps != 0 && !(x == 0 && y == 0) {
+			if got := posWire1Steps + wire2Steps; got < closest {
+				closest = got
+			}
+		}
+	})
+	return closest
+}
+
+func run(wire1, wire2 string, check1, check2 func(x, y int)) {
+	run := func(wire string, check func(x, y int)) {
 		x, y := 0, 0
 		for _, route := range strings.Split(wire, ",") {
 			var op func()
 			switch route[0] {
 			case 'R':
-				op = func() { x += 1}
+				op = func() { x += 1 }
 			case 'L':
-				op = func() { x -= 1}
+				op = func() { x -= 1 }
 			case 'U':
-				op = func() { y += 1}
+				op = func() { y += 1 }
 			case 'D':
-				op = func() { y -= 1}
+				op = func() { y -= 1 }
 			default:
 				panic("Unknown route op: " + route)
 			}
@@ -45,27 +87,19 @@ func closestIntersection(wire1, wire2 string) int {
 			if err != nil {
 				panic(route)
 			}
-			for i := 0 ; i < count; i++ {
+			for i := 0; i < count; i++ {
 				op()
 				check(x, y)
-				matrix[entry{x,y}] = val
 			}
 		}
 	}
-	run(wire1, 1, func(x, y int) {})
-	closest := math.MaxInt64
-	run(wire2, 2, func(x, y int) {
-		if matrix[entry{x,y}] == 1 && !(x == 0 && y == 0) {
-			if x < 0 {
-				x = -x
-			}
-			if y < 0  {
-				y = -y
-			}
-			if got := x + y; got < closest {
-				closest = got
-			}
-		}
-	})
-	return closest
+	run(wire1,  check1)
+	run(wire2,  check2)
+}
+
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
 }

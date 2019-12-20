@@ -5,14 +5,14 @@ import (
 )
 
 func TestGetFuel(t *testing.T) {
-	for _, tc := range []struct{
+	for _, tc := range []struct {
 		mass, fuel int
 	}{
 		{12, 2},
 		{14, 2},
-		{ 1969, 654},
+		{1969, 654},
 		{100756, 33583},
-	}{
+	} {
 		if got, want := getFuel(tc.mass), tc.fuel; got != want {
 			t.Errorf("For mass %d got %d, want %d", tc.mass, got, want)
 		}

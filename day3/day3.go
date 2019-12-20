@@ -57,7 +57,7 @@ func closestIntersectionSteps(wire1, wire2 string) int {
 		}
 	}, func(x, y int) {
 		wire2Steps++
-		if posWire1Steps := matrix[entry{x,y}]; posWire1Steps != 0 && !(x == 0 && y == 0) {
+		if posWire1Steps := matrix[entry{x, y}]; posWire1Steps != 0 && !(x == 0 && y == 0) {
 			if got := posWire1Steps + wire2Steps; got < closest {
 				closest = got
 			}
@@ -93,8 +93,8 @@ func run(wire1, wire2 string, check1, check2 func(x, y int)) {
 			}
 		}
 	}
-	run(wire1,  check1)
-	run(wire2,  check2)
+	run(wire1, check1)
+	run(wire2, check2)
 }
 
 func abs(x int) int {

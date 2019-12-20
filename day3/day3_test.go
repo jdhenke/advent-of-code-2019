@@ -4,8 +4,8 @@ import "testing"
 
 func TestClosestIntersections(t *testing.T) {
 	for _, tc := range []struct {
-		name              string
-		wire1, wire2      string
+		name                             string
+		wire1, wire2                     string
 		manhattanDistance, stepsDistance int
 	}{
 		{
@@ -29,7 +29,7 @@ func TestClosestIntersections(t *testing.T) {
 			135,
 			410,
 		},
-	}{
+	} {
 		t.Run(tc.name, func(t *testing.T) {
 			if got, want := closestIntersectionManhattan(tc.wire1, tc.wire2), tc.manhattanDistance; got != want {
 				t.Errorf("manhattan distance got %d, want %d", got, want)

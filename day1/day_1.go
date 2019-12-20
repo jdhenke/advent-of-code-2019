@@ -22,7 +22,7 @@ func PartA() int {
 }
 
 func getFuel(mass int) int {
-	return mass/3-2
+	return mass/3 - 2
 }
 
 func PartB() int {

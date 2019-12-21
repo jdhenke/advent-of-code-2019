@@ -9,6 +9,7 @@ const data = `222202222222222212222222022222122122022222210222122202212202222022
 
 func main() {
 	fmt.Println(PartA())
+	fmt.Println(PartB())
 }
 
 func PartA() int {
@@ -24,4 +25,26 @@ func PartA() int {
 		}
 	}
 	return answer
+}
+
+func PartB() string {
+	return decode(data, 6, 25)
+}
+
+func decode(data string, rows, cols int) string {
+	var layerSize = rows * cols
+	image := []byte(data[0:layerSize])
+	for i := layerSize; i < len(data); i += layerSize {
+		layer := data[i : i+layerSize]
+		for i := range layer {
+			if image[i] == '2' {
+				image[i] = layer[i]
+			}
+		}
+	}
+	output := ""
+	for r := 0; r < rows; r++ {
+		output += string(image[r*cols:(r+1)*cols]) + "\n"
+	}
+	return output
 }

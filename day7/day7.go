@@ -10,16 +10,22 @@ const realCode = `3,8,1001,8,10,8,105,1,0,0,21,34,51,68,89,98,179,260,341,422,99
 
 func main() {
 	fmt.Println(PartA())
+	fmt.Println(PartB())
 }
 
 func PartA() int {
-	_, output := findMaxAmp(realCode)
+	_, output := findMaxAmp(realCode, []int{0, 1, 2, 3, 4}, runAmplifiers)
 	return output
 }
 
-func findMaxAmp(code string) (bestCombo []int, bestOutput int) {
-	combos([]int{0, 1, 2, 3, 4}, func(ints []int) {
-		output := runAmplifiers(code, ints)
+func PartB() int {
+	_, output := findMaxAmp(realCode, []int{5, 6, 7, 8, 9}, runAmplifiersWithFeedback)
+	return output
+}
+
+func findMaxAmp(code string, settings []int, runFn func(string, []int) int) (bestCombo []int, bestOutput int) {
+	combos(settings, func(ints []int) {
+		output := runFn(code, ints)
 		if output > bestOutput {
 			bestOutput = output
 			bestCombo = make([]int, len(ints))
@@ -30,14 +36,37 @@ func findMaxAmp(code string) (bestCombo []int, bestOutput int) {
 }
 
 func runAmplifiers(code string, settings []int) int {
-	output := 0
+	var pipes []chan int
 	for _, setting := range settings {
-		input := make(chan int, 2)
-		input <- setting
-		input <- output
-		output = run(code, input)
+		c := make(chan int, 1)
+		c <- setting
+		pipes = append(pipes, c)
 	}
-	return output
+	pipes = append(pipes, make(chan int))
+	for i := range settings {
+		go run(code, pipes[i], pipes[i+1])
+	}
+	pipes[0] <- 0
+	return <-pipes[len(settings)]
+}
+
+func runAmplifiersWithFeedback(code string, settings []int) int {
+	var pipes []chan int
+	for _, setting := range settings {
+		c := make(chan int, 1)
+		c <- setting
+		pipes = append(pipes, c)
+	}
+	pipes = append(pipes, make(chan int))
+	for i := range settings {
+		go run(code, pipes[i], pipes[i+1])
+	}
+	pipes[0] <- 0
+	lastVal := 0
+	for lastVal = range pipes[len(settings)] {
+		pipes[0] <- lastVal
+	}
+	return lastVal
 }
 
 func combos(vals []int, fn func([]int), col int) {
@@ -52,7 +81,8 @@ func combos(vals []int, fn func([]int), col int) {
 	}
 }
 
-func run(code string, input <-chan int) int {
+func run(code string, input <-chan int, output chan<- int) {
+	defer close(output)
 	const (
 		opAdd = 1
 		opMul = 2
@@ -73,7 +103,6 @@ func run(code string, input <-chan int) int {
 		ops = append(ops, op)
 	}
 	i := 0
-	output := 0
 	for {
 		op := ops[i]
 		getParam := func(p int) int {
@@ -96,7 +125,8 @@ func run(code string, input <-chan int) int {
 			ops[ops[i+1]] = <-input
 			i += 2
 		case opOut:
-			output = getParam(1)
+			val := getParam(1)
+			output <- val
 			i += 2
 		case opJTr:
 			if getParam(1) != 0 {
@@ -125,7 +155,7 @@ func run(code string, input <-chan int) int {
 			ops[ops[i+3]] = val
 			i += 4
 		case opEnd:
-			return output
+			return
 		default:
 			panic(fmt.Sprintf("Unknown op at position %d: %d", i, op))
 		}

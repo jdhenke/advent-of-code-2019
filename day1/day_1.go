@@ -13,7 +13,7 @@ func main() {
 
 func PartA() int {
 	totalFuel := 0
-	if err := input.ForEachNumInFile("day1/day1.txt", func(i int) {
+	if err := input.ForEachNumInFile("day1.txt", func(i int) {
 		totalFuel += getFuel(i)
 	}); err != nil {
 		panic(err)
@@ -27,7 +27,7 @@ func getFuel(mass int) int {
 
 func PartB() int {
 	totalFuel := 0
-	if err := input.ForEachNumInFile("day1/day1.txt", func(i int) {
+	if err := input.ForEachNumInFile("day1.txt", func(i int) {
 		for additionalFuel := getFuel(i); additionalFuel > 0; additionalFuel = getFuel(additionalFuel) {
 			totalFuel += additionalFuel
 		}

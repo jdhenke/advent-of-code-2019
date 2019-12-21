@@ -10,11 +10,20 @@ const testCode = `1102,34463338,34463338,63,1007,63,34463338,63,1005,63,53,1101,
 
 func main() {
 	fmt.Println(PartA())
+	fmt.Println(PartB())
 }
 
 func PartA() int {
+	return runTestCode(1)
+}
+
+func PartB() int {
+	return runTestCode(2)
+}
+
+func runTestCode(val int) int {
 	input := make(chan int, 1)
-	input <- 1
+	input <- val
 	output := make(chan int)
 	go run(testCode, input, output)
 	var latest int

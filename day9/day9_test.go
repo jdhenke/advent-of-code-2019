@@ -44,3 +44,9 @@ func TestPartA(t *testing.T) {
 		t.Errorf("PartA got %d, want %d", got, want)
 	}
 }
+
+func TestPartB(t *testing.T) {
+	if got, want := PartB(), 73144; got != want {
+		t.Errorf("PartB got %d, want %d", got, want)
+	}
+}

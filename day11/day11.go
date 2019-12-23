@@ -19,15 +19,59 @@ const (
 
 func main() {
 	fmt.Println(PartA())
+	fmt.Println(PartB())
 }
 
 func PartA() int {
+	return len(paint(0))
+}
+
+func PartB() string {
+	hull := paint(1)
+	minX, minY, maxX, maxY := 0, 0, 0, 0
+	for e := range hull {
+		if e.x < minX {
+			minX = e.x
+		}
+		if e.x > maxX {
+			maxX = e.x
+		}
+		if e.y < minY {
+			minY = e.y
+		}
+		if e.y > maxY {
+			maxY = e.y
+		}
+	}
+	var rows []string
+	for y := maxY; y >= minY; y-- {
+		rowData := make([]byte, maxX+1)
+		for x := minX; x <= maxX; x++ {
+			var b byte
+			switch hull[entry{x, y}] {
+			case 0:
+				b = ' '
+			case 1:
+				b = 'X'
+			default:
+				panic(entry{x, y})
+			}
+			rowData[x] = b
+		}
+		rows = append(rows, string(rowData))
+	}
+	return strings.Join(rows, "\n")
+}
+
+type entry struct{ x, y int }
+
+func paint(startColor int) map[entry]int {
 	input := make(chan int, 1)
 	output := make(chan int, 1)
 	go run(realCode, input, output)
-	input <- 0
-	type entry struct{ x, y int }
+	input <- startColor
 	hull := make(map[entry]int)
+	hull[entry{0, 0}] = startColor
 	x, y := 0, 0
 	dir := up
 	for paint := range output {
@@ -63,7 +107,7 @@ func PartA() int {
 		}
 		input <- hull[entry{x, y}]
 	}
-	return len(hull)
+	return hull
 }
 
 func run(code string, input <-chan int, output chan<- int) {

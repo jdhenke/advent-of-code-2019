@@ -107,7 +107,7 @@ func TestSimplify(t *testing.T) {
 	}
 }
 
-func TestGetAsteroidsInSight(t *testing.T) {
+func TestGetNumAsteroidsInSight(t *testing.T) {
 	for _, tc := range []struct {
 		name       string
 		input      string
@@ -137,7 +137,7 @@ func TestGetAsteroidsInSight(t *testing.T) {
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			if got, want := getAsteroidsInSight(tc.input, tc.x, tc.y), tc.want; got != want {
+			if got, want := getNumAsteroidsInSight(tc.input, tc.x, tc.y), tc.want; got != want {
 				t.Errorf("got %d, want %d", got, want)
 			}
 		})
@@ -147,5 +147,59 @@ func TestGetAsteroidsInSight(t *testing.T) {
 func TestPartA(t *testing.T) {
 	if got, want := PartA(), 221; got != want {
 		t.Errorf("PartA got %d, want %d", got, want)
+	}
+}
+
+func TestGetVaporizationOrder(t *testing.T) {
+	//	getVaporizationOrder(`.#....#####...#..
+	//##...##.#####..##
+	//##...#...#.#####.
+	//..#.....#...###..
+	//..#.#.....#....##`, 8, 3 )
+	order := getVaporizationOrder(`.#..##.###...#######
+##.############..##.
+.#.######.########.#
+.###.#######.####.#.
+#####.##.#.##.###.##
+..#####..#.#########
+####################
+#.####....###.#.#.##
+##.#################
+#####.##.###..####..
+..######..##.#######
+####.##.####...##..#
+.#####..#.######.###
+##...#.##########...
+#.##########.#######
+.####.#.###.###.#.##
+....##.##.###..#####
+.#.#.###########.###
+#.#.#.#####.####.###
+###.##.####.##.#..##`, 11, 13)
+	for _, entry := range []struct {
+		i   int
+		loc int
+	}{
+		{1, 1112},
+		{2, 1201},
+		{3, 1202},
+		{10, 1208},
+		{20, 1600},
+		{50, 1609},
+		{100, 1016},
+		{199, 906},
+		{200, 802},
+		{201, 1009},
+		{299, 1101},
+	} {
+		if got, want := order[entry.i-1], entry.loc; got != want {
+			t.Errorf("%d got %d, want %d", entry.i, got, want)
+		}
+	}
+}
+
+func TestPartB(t *testing.T) {
+	if got, want := PartB(), 806; got != want {
+		t.Errorf("PartB got %d, want %d", got, want)
 	}
 }

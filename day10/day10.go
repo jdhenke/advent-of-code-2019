@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"math"
+	"sort"
 	"strings"
 )
 
@@ -29,11 +31,17 @@ const realInput = `###..#########.#####.
 
 func main() {
 	fmt.Println(PartA())
+	fmt.Println(PartB())
 }
 
 func PartA() int {
 	_, _, num := findBestAsteroid(realInput)
 	return num
+}
+
+func PartB() int {
+	x, y, _ := findBestAsteroid(realInput)
+	return getVaporizationOrder(realInput, x, y)[200-1]
 }
 
 func findBestAsteroid(input string) (bestX, bestY, numAsteroids int) {
@@ -45,7 +53,7 @@ func findBestAsteroid(input string) (bestX, bestY, numAsteroids int) {
 			if lines[y][x] != '#' {
 				continue
 			}
-			if a := getAsteroidsInSight(input, x, y); a > numAsteroids {
+			if a := getNumAsteroidsInSight(input, x, y); a > numAsteroids {
 				bestX, bestY, numAsteroids = x, y, a
 			}
 		}
@@ -53,26 +61,14 @@ func findBestAsteroid(input string) (bestX, bestY, numAsteroids int) {
 	return
 }
 
-func getAsteroidsInSight(input string, baseX, baseY int) int {
-	lines := strings.Split(strings.TrimSpace(input), "\n")
-	var grid [][]bool
-	for _, line := range lines {
-		var gridRow []bool
-		for _, c := range line {
-			val := false
-			switch c {
-			case '#':
-				val = true
-			case '.':
-			default:
-				panic(c)
-			}
-			gridRow = append(gridRow, val)
-		}
-		grid = append(grid, gridRow)
-	}
+func getNumAsteroidsInSight(input string, baseX, baseY int) int {
+	grid := toGrid(input)
+	return len(getAsteroidsInSight(grid, baseX, baseY))
+}
+
+func getAsteroidsInSight(grid [][]bool, baseX, baseY int) []int {
 	//fmt.Println(grid)
-	numInSight := 0
+	var asteroidsInSight []int
 	for y := range grid {
 		for x := range grid[y] {
 			if !grid[y][x] {
@@ -101,11 +97,32 @@ func getAsteroidsInSight(input string, baseX, baseY int) int {
 			}
 			if inSight {
 				//fmt.Printf("In sight (%d, %d)\n", x, y)
-				numInSight++
+				asteroidsInSight = append(asteroidsInSight, x*100+y)
 			}
 		}
 	}
-	return numInSight
+	return asteroidsInSight
+}
+
+func toGrid(input string) [][]bool {
+	lines := strings.Split(strings.TrimSpace(input), "\n")
+	var grid [][]bool
+	for _, line := range lines {
+		var gridRow []bool
+		for _, c := range line {
+			val := false
+			switch c {
+			case '#':
+				val = true
+			case '.':
+			default:
+				panic(c)
+			}
+			gridRow = append(gridRow, val)
+		}
+		grid = append(grid, gridRow)
+	}
+	return grid
 }
 
 func abs(x int) int {
@@ -128,4 +145,29 @@ func simplify(a, b int) (f1, f2 int) {
 		}
 	}
 	return a, b
+}
+
+func getVaporizationOrder(input string, baseX, baseY int) []int {
+	grid := toGrid(input)
+	var output []int
+	for inSight := getAsteroidsInSight(grid, baseX, baseY); len(inSight) > 0; inSight = getAsteroidsInSight(grid, baseX, baseY) {
+		sort.Slice(inSight, func(i, j int) bool {
+			xi, yi := inSight[i]/100-baseX, inSight[i]%100-baseY
+			xj, yj := inSight[j]/100-baseX, inSight[j]%100-baseY
+			return getTheta(xi, yi) < getTheta(xj, yj)
+		})
+		output = append(output, inSight...)
+		for _, loc := range inSight {
+			//xi, yi := loc/100-baseX, loc%100-baseY
+			//fmt.Println(loc, xi, yi, getTheta(xi, yi))
+			grid[loc%100][loc/100] = false
+		}
+	}
+	return output
+}
+
+func getTheta(xi, yi int) float64 {
+	fxi := float64(xi)
+	fyi := float64(yi)
+	return math.Atan2(-fxi, fyi)
 }
